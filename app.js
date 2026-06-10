@@ -315,8 +315,11 @@ async function saveImage() {
   const blob = await new Promise((res) => canvas.toBlob(res, origType, 0.92));
   if (!blob) { showToast('保存に失敗しました'); return; }
 
+  // スマホは共有シート(→「画像を保存」でカメラロールへ)、PC は直接ダウンロード
+  const isMobile = navigator.userAgentData?.mobile
+    ?? /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const file = new File([blob], name, { type: origType });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+  if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file] });
       return;
