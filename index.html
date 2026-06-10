@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1c1c1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ぬりけし - 塗りつぶし消しゴム</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="viewport">
+  <canvas id="canvas" hidden></canvas>
+  <div id="empty">
+    <p>画像の一部を、選んだ色で<br>塗りつぶして消すアプリです</p>
+    <button id="emptyOpenBtn" class="big-btn">画像を開く</button>
+  </div>
+  <div id="toast" hidden></div>
+</div>
+
+<div id="toolbar">
+  <div class="row">
+    <button id="openBtn" title="画像を開く">📂<span>開く</span></button>
+    <button id="saveBtn" title="保存" disabled>💾<span>保存</span></button>
+    <span class="sep"></span>
+    <button id="swatchBlack" class="swatch" title="黒"><i style="background:#000"></i><span>黒</span></button>
+    <button id="swatchWhite" class="swatch" title="白"><i style="background:#fff"></i><span>白</span></button>
+    <label id="colorWrap" class="swatch" title="色を選ぶ">
+      <input type="color" id="colorPicker" value="#000000">
+      <span>色</span>
+    </label>
+    <button id="eyedropBtn" title="画像から色を拾う" disabled>💉<span>スポイト</span></button>
+    <span class="sep"></span>
+    <button id="undoBtn" title="取り消し" disabled>↩️<span>戻す</span></button>
+    <button id="redoBtn" title="やり直し" disabled>↪️<span>進む</span></button>
+  </div>
+  <div class="row">
+    <button id="shapeRound" class="shape active" title="丸ペン"><i class="dot-round"></i><span>丸</span></button>
+    <button id="shapeSquare" class="shape" title="四角ペン"><i class="dot-square"></i><span>四角</span></button>
+    <input type="range" id="sizeSlider" min="2" max="120" value="24" step="1">
+    <span id="sizeValue">24</span>
+    <button id="fitBtn" title="全体表示" disabled>⤢<span>全体</span></button>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" hidden>
+<script src="app.js"></script>
+</body>
+</html>
