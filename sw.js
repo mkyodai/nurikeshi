@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'nurikeshi-v2';
+const CACHE = 'nurikeshi-v3';
 const ASSETS = [
   './',
   './index.html',

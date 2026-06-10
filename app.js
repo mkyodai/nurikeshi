@@ -66,6 +66,23 @@ function viewportXY(e) {
   return { x: e.clientX - r.left, y: e.clientY - r.top };
 }
 
+// ===== ペン先カーソル(画面上にブラシの輪郭を表示) =====
+const brushCursor = $('brushCursor');
+
+function showBrushCursor(vx, vy) {
+  const d = Math.max(2, brushSize * view.s);
+  brushCursor.style.width = d + 'px';
+  brushCursor.style.height = d + 'px';
+  brushCursor.style.left = vx + 'px';
+  brushCursor.style.top = vy + 'px';
+  brushCursor.classList.toggle('round', brushShape === 'round');
+  brushCursor.hidden = false;
+}
+
+function hideBrushCursor() {
+  brushCursor.hidden = true;
+}
+
 function updateButtons() {
   $('undoBtn').disabled = undoStack.length === 0;
   $('redoBtn').disabled = redoStack.length === 0;
@@ -174,6 +191,7 @@ function setEyedropper(on) {
   eyedropper = on && hasImage;
   $('eyedropBtn').classList.toggle('active', eyedropper);
   viewport.style.cursor = eyedropper ? 'crosshair' : '';
+  if (eyedropper) hideBrushCursor();
 }
 
 function samplePixel(p) {
@@ -204,6 +222,7 @@ viewport.addEventListener('pointerdown', (e) => {
     strokeSnapshot = snapshot();
     lastPt = p;
     drawDot(p);
+    showBrushCursor(v.x, v.y);
     mode = 'stroke';
   } else if (pointers.size === 2) {
     // 2本目の指 → 進行中のストロークを取り消してピンチへ
@@ -212,12 +231,20 @@ viewport.addEventListener('pointerdown', (e) => {
       strokeSnapshot = null;
     }
     mode = 'pinch';
+    hideBrushCursor();
     startPinch();
   }
 });
 
 viewport.addEventListener('pointermove', (e) => {
-  if (!pointers.has(e.pointerId)) return;
+  if (!pointers.has(e.pointerId)) {
+    // ボタンを押していないマウス移動: ホバー位置にペン先プレビューを表示
+    if (mode === 'idle' && hasImage && !eyedropper && e.pointerType === 'mouse') {
+      const v = viewportXY(e);
+      showBrushCursor(v.x, v.y);
+    }
+    return;
+  }
   e.preventDefault();
 
   if (mode === 'stroke') {
@@ -229,7 +256,9 @@ viewport.addEventListener('pointermove', (e) => {
       drawSegment(lastPt, p);
       lastPt = p;
     }
-    pointers.set(e.pointerId, viewportXY(e));
+    const v = viewportXY(e);
+    showBrushCursor(v.x, v.y);
+    pointers.set(e.pointerId, v);
   } else if (mode === 'pinch') {
     pointers.set(e.pointerId, viewportXY(e));
     movePinch();
@@ -239,6 +268,8 @@ viewport.addEventListener('pointermove', (e) => {
 function endPointer(e) {
   if (!pointers.has(e.pointerId)) return;
   pointers.delete(e.pointerId);
+
+  if (e.pointerType !== 'mouse') hideBrushCursor();
 
   if (mode === 'stroke' && pointers.size === 0) {
     commitStroke();
@@ -301,6 +332,8 @@ viewport.addEventListener('wheel', (e) => {
   view.ty = v.y - iy * s;
   applyView();
 }, { passive: false });
+
+viewport.addEventListener('pointerleave', hideBrushCursor);
 
 viewport.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -376,6 +409,12 @@ $('shapeSquare').addEventListener('click', () => {
 sizeSlider.addEventListener('input', () => {
   brushSize = Number(sizeSlider.value);
   sizeValue.textContent = brushSize;
+  // サイズ調整中は画面中央に実寸プレビューを表示
+  if (hasImage) {
+    showBrushCursor(viewport.clientWidth / 2, viewport.clientHeight / 2);
+    clearTimeout(sizeSlider._t);
+    sizeSlider._t = setTimeout(hideBrushCursor, 800);
+  }
 });
 
 selectSwatch('black');

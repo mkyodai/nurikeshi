@@ -34,7 +34,17 @@ body {
   box-shadow: 0 0 24px rgba(0,0,0,.6);
 }
 
-#empty[hidden], #toast[hidden] { display: none; }
+#empty[hidden], #toast[hidden], #brushCursor[hidden] { display: none; }
+
+#brushCursor {
+  position: absolute;
+  pointer-events: none;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 1.5px rgba(0,0,0,.65), inset 0 0 0 1.5px rgba(0,0,0,.65);
+  transform: translate(-50%, -50%);
+  z-index: 5;
+}
+#brushCursor.round { border-radius: 50%; }
 
 #empty {
   position: absolute;
