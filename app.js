@@ -348,11 +348,11 @@ async function saveImage() {
   const blob = await new Promise((res) => canvas.toBlob(res, origType, 0.92));
   if (!blob) { showToast('保存に失敗しました'); return; }
 
-  // スマホは共有シート(→「画像を保存」でカメラロールへ)、PC は直接ダウンロード
-  const isMobile = navigator.userAgentData?.mobile
-    ?? /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  // iPhone/iPad のみ共有シート(→「画像を保存」で写真アプリへ)。
+  // Android は共有パネルに保存項目が無い機種があるため、PC と同じく直接ダウンロード。
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
   const file = new File([blob], name, { type: origType });
-  if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+  if (isIOS && navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file] });
       return;
@@ -367,7 +367,7 @@ async function saveImage() {
   a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
-  showToast('ダウンロードしました');
+  showToast('「ダウンロード」フォルダに保存しました');
 }
 
 // ===== ツールバー =====
